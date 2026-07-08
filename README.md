@@ -26,18 +26,18 @@ If you use this code, the UHAS representation, or build upon this work, please c
 **Cross-Embodiment Robot Manipulation via a Unified Hand Action Space**  
 Luis Felipe Casas, Robert Teal, Keval Shah, Abhijit Tadepalli, Wanxin Jin, Yu Xiang
 
-[Project Website](https://irvlutd.github.io/UHAS) | [arXiv Paper](https://arxiv.org/abs/PLACEHOLDER) | [Demo Video](https://irvlutd.github.io/UHAS) | [Trained Models](https://github.com/IRVLUTD/UHAS_sim/releases)
+[Project Website](https://irvlutd.github.io/UHAS) | [arXiv Paper](https://arxiv.org/abs/2607.03570) | [Trained Models](https://utdallas.box.com/s/qq14yjwqzouv4a3dj95c3a5nght6g47j)
 
 ```bibtex
-@misc{casas2026uhas,
-  title={Cross-Embodiment Robot Manipulation via a Unified Hand Action Space},
-  author={Casas, Luis Felipe and Teal, Robert and Shah, Keval and Tadepalli, Abhijit and Jin, Wanxin and Xiang, Yu},
-  year={2026},
-  eprint={PLACEHOLDER},
-  archivePrefix={arXiv},
-  primaryClass={cs.RO},
-  url={https://arxiv.org/abs/PLACEHOLDER}
-}
+@misc{casas2026crossembodiment,
+    title={Cross-Embodiment Robot Manipulation via a Unified Hand Action Space}, 
+    author={Luis Felipe Casas and Robert Teal and Keval Shah and Abhijit Tadepalli and Wanxin Jin and Yu Xiang},
+    year={2026},
+    eprint={2607.03570},
+    archivePrefix={arXiv},
+    primaryClass={cs.RO},
+    url={https://arxiv.org/abs/2607.03570} 
+  }
 ```
 
 ---
