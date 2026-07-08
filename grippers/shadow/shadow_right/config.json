@@ -1,0 +1,26 @@
+{
+    "opened_dofs": {
+        "thumb_joint1": -1.0472,
+        "thumb_joint2": 1.2,
+        "thumb_joint3": 0.0,
+        "thumb_joint4": 0.0,
+        "thumb_joint5": 0.0,
+        "index_finger_joint1": 0.0,
+        "index_finger_joint2": 0.0,
+        "index_finger_joint3": 0.0,
+        "index_finger_joint4": 0.0,
+        "middle_finger_joint1": 0.0,
+        "middle_finger_joint2": 0.0,
+        "middle_finger_joint3": 0.0,
+        "middle_finger_joint4": 0.0,
+        "ring_finger_joint1": 0.0,
+        "ring_finger_joint2": 0.0,
+        "ring_finger_joint3": 0.0,
+        "ring_finger_joint4": 0.0,
+        "little_finger_joint1": 0.0, 
+        "little_finger_joint2": 0.0, 
+        "little_finger_joint3": 0.0, 
+        "little_finger_joint4": 0.0, 
+        "little_finger_joint5": 0.0
+    }
+}

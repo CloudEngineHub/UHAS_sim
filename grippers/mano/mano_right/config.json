@@ -1,0 +1,26 @@
+{
+    "opened_dofs": {
+        "j_index1y": 0.2, 
+        "j_index1z": 0.0, 
+        "j_index2z": 0.0, 
+        "j_index3z": 0.0, 
+        "j_middle1y": 0.08, 
+        "j_middle1z": 0.0, 
+        "j_middle2z": 0.0, 
+        "j_middle3z": 0.0, 
+        "j_pinky1y": -0.3, 
+        "j_pinky1z": 0.0, 
+        "j_pinky2z": 0.0, 
+        "j_pinky3z": 0.0, 
+        "j_ring1y": -0.05, 
+        "j_ring1z": 0.0, 
+        "j_ring2z": 0.0, 
+        "j_ring3z": 0.0,
+        "j_thumb1x": 0.0, 
+        "j_thumb1y": -1.0, 
+        "j_thumb1z": 0.0, 
+        "j_thumb2y": 0.0,
+        "j_thumb2z": 0.0, 
+        "j_thumb3z": 0.0
+    } 
+}
