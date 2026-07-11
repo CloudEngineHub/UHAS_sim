@@ -175,7 +175,7 @@ The UHAS creation process builds a canonical sphere, establishes dense surface c
 Before running the processing script, you must add two important frames to your URDF (or USD):
 
 - **Palm frame** (`palm_link` or similar): Its **+Z axis must point outward along the palm normal** (direction the fingers close toward).
-- **Fingertip frames** (one per finger): Their **+Z axis must point along the fingertip normal** (usually outward from the last link).
+- **Fingertip frames** (one per finger): Their **+Z axis must point along the fingertip normal**.
 
 **Recommendation**: Use the **Isaac Sim GUI** to create and align these frames visually — it is much easier than editing the URDF by hand.
 
