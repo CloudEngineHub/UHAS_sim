@@ -1,6 +1,5 @@
 import torch
 import numpy as np
-import tf.transformations as tf
 import json
 
 def torch_compute_deformed_sphere_points_detached_fingers_dynamic_anchors(
