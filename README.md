@@ -65,7 +65,6 @@ See the [LICENSE](LICENSE) file for the full license text.
   - [Bring Your Own Hand](#bring-your-own-hand)
     - [How to add and test your own hand](#how-to-add-and-test-your-own-hand)
   - [Real World Implementation](#real-world-implementation)
-  - [](#)
   - [Helpful Links](#helpful-links)
 
 ---
@@ -187,7 +186,9 @@ python play.py --task UHAS-Inhand-Repose --checkpoint path/to/model.pt
 
 
 At this point you can also **test our trained models** directly in simulation. To obtain reliable metrics (Success Rate and Average Consecutive Reorientations), we recommend running evaluation with **1000 parallel environments** — this can be configured in the environment configuration files under `sphere_ctrl_isaaclab/source/sphere_ctrl_isaaclab/tasks/`. You can train or evaluate using any of our supported hands: **LEAP Hand**, **Allegro Hand**, **Shadow Hand**, and **MANO Human Hand**.
-For more information about the options available for running the simulations also refer to the `sphere_ctrl_isaaclab/source/sphere_ctrl_isaaclab/sphere_ctrl_isaaclab/tasks` 
+For more information about the options available for running the simulations also refer to the `sphere_ctrl_isaaclab/source/sphere_ctrl_isaaclab/sphere_ctrl_isaaclab/tasks`
+
+**In-hand objects.** Alternate assets (DexCube and YCB cracker box, mustard bottle, tomato soup can) are listed in the task configs (`UHAS_inhand/multi_env_cfg.py` and `single_gripper/hand_env_cfg.py`). Uncomment the desired `object_usd_path` and set `scale` so the object still fits for in-hand reorientation (suggested scales are in the comments next to each option). 
 
 ---
 
@@ -263,14 +264,14 @@ Here are the real-world experimental setups used in our paper:
     </td>
   </tr>
 </table>
----
+
 
 ## Helpful Links
 
 - [NVIDIA Isaac Sim 4.5.0 Documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/index.html)
 - [Isaac Lab 2.2.1 Installation & Documentation](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/index.html)
 
----
+
 
 **Thank you for your interest in our work at the Intelligent Robotics and Vision Lab (IRVL); UT Dallas**
 

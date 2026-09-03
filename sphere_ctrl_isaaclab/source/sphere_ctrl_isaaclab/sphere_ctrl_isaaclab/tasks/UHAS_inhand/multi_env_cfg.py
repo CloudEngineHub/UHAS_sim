@@ -219,17 +219,25 @@ class SphereEnvCfg(DirectRLEnvCfg):
     training = True    
     evaluation = False
     reset_timer = True # reset episode length timer at every repose.
-    robots = ["shadow_right", "leap_right", "mano_right", "allegro_right"]
+    robots = ["shadow_right", "mano_right", "allegro_right", "wuji_right", "leap_right"]
     # Possible values: "shadow_right", "leap_right", "mano_right", "allegro_right", "wuji_right"
 
-    # Gripper options
+    # Fingers  
     max_fingers = 5
-    scale = 7.0 / 6.0 # 6 cm size for Isaac lab default DexCube
+    
+    # Object Options
+    scale = 7.0 / 6.0 # 6 cm size for Isaac lab default DexCube #cube adn tomato
+    object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd" # scale 7.0 / 6.0
+
+    # Available: 
+    # object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/003_cracker_box.usd" # scale 3.5 / 6.0
+    # object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/006_mustard_bottle.usd" # scale 5.0 / 6.0
+    # object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/005_tomato_soup_can.usd" # scale 7.0 / 6.0
 
     # Debug 
     debug_fingers = False 
     debug_object_inhand = False
-    debug_speed_factor = 1.0 # Action Hz
+    debug_speed_factor = 4.0 # Action Hz
 
     ###########################################################################################
     # Training Options
@@ -329,7 +337,8 @@ class SphereEnvCfg(DirectRLEnvCfg):
 
     # Curriculum 
     curriculm_length = 10000 # Iteration counts for the entire curriculum (4 equal stages, stage length =/4)
-    iteration_bias = 0 * (curriculm_length / 3) # Debug Curriculum training
+    # iteration_bias = 0 * (curriculm_length / 3) # Debug Curriculum training
+    iteration_bias = 0 # Debug Curriculum training
     n_iter_per_stage = curriculm_length / 3
 
     ###########################################################################################    
@@ -337,7 +346,7 @@ class SphereEnvCfg(DirectRLEnvCfg):
     sphere_cik_info = "sphere_cik.json" 
     fp_sample = "fp_sample_7" # Was using fp_projected before
     fp_sample_size = 7
-    success_tolerance = 0.1
+    success_tolerance = 0.1 if training else 0.2
     av_factor = 0.1
     fall_dist = 0.2   
     ref_sphere = import_reference_sphere()
@@ -345,7 +354,7 @@ class SphereEnvCfg(DirectRLEnvCfg):
     # simulation
     sim: SimulationCfg = SimulationCfg(
         dt=1 / 120,
-        render_interval=decimation,
+        render_interval=1,
         gravity=(0.0, 0.0, -9.81),
         physics_material=RigidBodyMaterialCfg(
             static_friction=1.0,
@@ -369,124 +378,148 @@ class SphereEnvCfg(DirectRLEnvCfg):
     object_cfgs = {}
     cube_scales = {}
     cube_masses = {}
-
-    # Calculate number of robot types
-    num_robot_types = len(robots)
-
-    # Base number of environments per robot type
-    base = num_envs // num_robot_types
-
-    # Remainder to distribute
-    remainder = num_envs % num_robot_types
-
-    articulation_cfg = ImplicitActuatorCfg(
-            joint_names_expr=[".*"],
-            effort_limit_sim = effort_lim,
-            stiffness=kP,
-            damping=kD,
-            velocity_limit_sim= vel_lim,
-            friction = act_st_friction,
-            dynamic_friction = act_dyn_friction,
-            armature = armature
-        )
-    
-
-    # Populate self.num_robots
     num_robots = {}
     custom_events = {}
-    start = 0
-    cube_density = cube_mass/(cube_size**3)
-    for i, robot in enumerate(robots):
-        num = base + 1 if i < remainder else base
-        num_robots[robot] = num
-
-        # Build regex as alternation of string numbers in range
-        nums = [str(j) for j in range(start, start + num)]
-        regex = '|'.join(nums)
-        if len(nums) > 1:
-            regex = f"({regex})"
-        robot_path = f"/World/envs/env_{regex}/{robot}"
-        object_path = robot_path + "_object"
-        if robot == "shadow_right":
-            robot_cfg: ArticulationCfg = SHADOW_HAND_CFG.replace(prim_path=robot_path, actuators = {"fingers": articulation_cfg})
-            cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "shadow", robot,sphere_cik_info)
-        elif robot == "leap_right":
-            robot_cfg: ArticulationCfg = LEAP_HAND_RIGHT_CFG.replace(prim_path=robot_path, actuators = {"fingers": articulation_cfg})
-            cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "leap", robot,sphere_cik_info)
-        elif robot == "mano_right":
-            robot_cfg: ArticulationCfg = MOD_MANO_HAND_RIGHT_CFG.replace(prim_path=robot_path, actuators = {"fingers": articulation_cfg})
-            cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "mano", robot,sphere_cik_info)
-        elif robot == "allegro_right":
-            robot_cfg: ArticulationCfg = ALLEGRO_HAND_RIGHT_CFG.replace(prim_path=robot_path, actuators = {"fingers": articulation_cfg})
-            cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "allegro", robot,sphere_cik_info)
-        elif robot == "wuji_right":
-            robot_cfg: ArticulationCfg = WUJI_HAND_RIGHT_CFG.replace(prim_path=robot_path, actuators = {"fingers": articulation_cfg})
-            cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "wuji", robot,sphere_cik_info)
-        else:
-            raise ValueError(f"Unable to identify Robot Tag {robot}.")
-        
-        
-        start += num
-        robot_cfgs[robot] = robot_cfg
-        cik_infos[robot] = load_from_json(cik_json_path) 
-        sphere_radius = cik_infos[robot]["joint_info"]["sphere_frame"][6]
-        cube_scale = scale * sphere_radius/base_radius
-        robot_cube_mass = cube_density * ((cube_size * sphere_radius/base_radius))**3 # Can end up in very small values for small grippers
-        robot_cube_mass = cube_density * (cube_size)**3 * (sphere_radius/base_radius) # Could use linear, since effort (torque) is linear to hand size
-        cube_scales[robot] = cube_scale
-        cube_masses[robot] = robot_cube_mass
-        print(f"Loaded sphere information from {cik_json_path}")
-
-        # in-hand object
-        object_cfg: RigidObjectCfg = RigidObjectCfg(
-            prim_path=object_path,
-            spawn=sim_utils.UsdFileCfg(
-                usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                rigid_props=sim_utils.RigidBodyPropertiesCfg(
-                    kinematic_enabled=False,
-                    disable_gravity=False, 
-                    enable_gyroscopic_forces=True,
-                    solver_position_iteration_count=8,
-                    solver_velocity_iteration_count=0,
-                    sleep_threshold=0.005,
-                    stabilization_threshold=0.0025,
-                    max_depenetration_velocity=1000.0,
-                ),
-                mass_props=sim_utils.MassPropertiesCfg(mass = robot_cube_mass), # Density doesn't work in this class
-                scale=(cube_scale, cube_scale, cube_scale),
-
-            ),
-            init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0 , 0.0), rot=(1.0, 0.0, 0.0, 0.0)),
-        )
-        object_cfgs[robot] = object_cfg
-
-        # Randomizations
-        custom_events[robot] = EventCfg(robot, training, n_iter_per_stage, randomize_scale, randomize_mass, randomize_effort, randomize_vel, cube_scale)
-    
 
     # Model Size
-    action_space = (1 + len(vector_phis)) * max_fingers 
+    action_space = (1 + len(vector_phis)) * max_fingers
     observation_space = 100
     state_space = 0
-    
+
     # goal object
     goal_object_cfg: VisualizationMarkersCfg = VisualizationMarkersCfg(
         prim_path="/Visuals/goal_marker",
         markers={
             "goal": sim_utils.UsdFileCfg(
-                usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(1.0, 1.0, 1.0),
+                usd_path=object_usd_path,
+                scale=(scale/2, scale/2, scale/2),
             )
         },
     )
 
-    # scene
+    # Default env count. CLI `--num_envs` (argparse) and Hydra `env.scene.num_envs=`
+    # both override this; populate_robot_layout() then rebuilds prim-path regexes.
     spacing = 0.75
-    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=num_envs, env_spacing=spacing, replicate_physics=False)
+    scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=8192, env_spacing=spacing, replicate_physics=False)
 
-    # Clean for better env.yaml
-    del nums
-    del start
-    del sphere_radius 
-    del cube_scale
-    del base
+    def populate_robot_layout(self) -> None:
+        """Split envs across hands and rebuild USD prim-path regexes.
+
+        UHAS assigns each env index to one robot type via the spawn prim_path.
+        That regex must match the final ``scene.num_envs``. It cannot be read
+        from ``sys.argv`` at import: ``train.py`` already consumes ``--num_envs``
+        and strips it so Hydra never sees the argparse flag.
+        """
+        num_envs = int(self.scene.num_envs)
+        robots = list(self.robots)
+        num_robot_types = len(robots)
+        if num_robot_types == 0:
+            raise ValueError("SphereEnvCfg.robots is empty")
+
+        base = num_envs // num_robot_types
+        remainder = num_envs % num_robot_types
+
+        articulation_cfg = ImplicitActuatorCfg(
+            joint_names_expr=[".*"],
+            effort_limit_sim=self.effort_lim,
+            stiffness=self.kP,
+            damping=self.kD,
+            velocity_limit_sim=self.vel_lim,
+            friction=self.act_st_friction,
+            dynamic_friction=self.act_dyn_friction,
+            armature=self.armature,
+        )
+
+        self.num_robots = {}
+        self.robot_cfgs = {}
+        self.object_cfgs = {}
+        self.cik_infos = {}
+        self.cube_scales = {}
+        self.cube_masses = {}
+        self.custom_events = {}
+
+        cube_density = self.cube_mass / (self.cube_size ** 3)
+        start = 0
+        for i, robot in enumerate(robots):
+            num = base + 1 if i < remainder else base
+            self.num_robots[robot] = num
+
+            nums = [str(j) for j in range(start, start + num)]
+            regex = "|".join(nums)
+            if len(nums) > 1:
+                regex = f"({regex})"
+            robot_path = f"/World/envs/env_{regex}/{robot}"
+            object_path = robot_path + "_object"
+            if robot == "shadow_right":
+                robot_cfg: ArticulationCfg = SHADOW_HAND_CFG.replace(
+                    prim_path=robot_path, actuators={"fingers": articulation_cfg}
+                )
+                cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "shadow", robot, self.sphere_cik_info)
+            elif robot == "leap_right":
+                robot_cfg: ArticulationCfg = LEAP_HAND_RIGHT_CFG.replace(
+                    prim_path=robot_path, actuators={"fingers": articulation_cfg}
+                )
+                cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "leap", robot, self.sphere_cik_info)
+            elif robot == "mano_right":
+                robot_cfg: ArticulationCfg = MOD_MANO_HAND_RIGHT_CFG.replace(
+                    prim_path=robot_path, actuators={"fingers": articulation_cfg}
+                )
+                cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "mano", robot, self.sphere_cik_info)
+            elif robot == "allegro_right":
+                robot_cfg: ArticulationCfg = ALLEGRO_HAND_RIGHT_CFG.replace(
+                    prim_path=robot_path, actuators={"fingers": articulation_cfg}
+                )
+                cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "allegro", robot, self.sphere_cik_info)
+            elif robot == "wuji_right":
+                robot_cfg: ArticulationCfg = WUJI_HAND_RIGHT_CFG.replace(
+                    prim_path=robot_path, actuators={"fingers": articulation_cfg}
+                )
+                cik_json_path = os.path.join(IRVL_ASSET_PATH, "grippers", "wuji", robot, self.sphere_cik_info)
+            else:
+                raise ValueError(f"Unable to identify Robot Tag {robot}.")
+
+            start += num
+            self.robot_cfgs[robot] = robot_cfg
+            self.cik_infos[robot] = load_from_json(cik_json_path)
+            sphere_radius = self.cik_infos[robot]["joint_info"]["sphere_frame"][6]
+            cube_scale = self.scale * sphere_radius / self.base_radius
+            robot_cube_mass = cube_density * (self.cube_size) ** 3 * (sphere_radius / self.base_radius)
+            self.cube_scales[robot] = cube_scale
+            self.cube_masses[robot] = robot_cube_mass
+            print(f"Loaded sphere information from {cik_json_path}")
+
+            object_cfg: RigidObjectCfg = RigidObjectCfg(
+                prim_path=object_path,
+                spawn=sim_utils.UsdFileCfg(
+                    usd_path=self.object_usd_path,
+                    rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                        kinematic_enabled=False,
+                        disable_gravity=False,
+                        enable_gyroscopic_forces=True,
+                        solver_position_iteration_count=8,
+                        solver_velocity_iteration_count=0,
+                        sleep_threshold=0.005,
+                        stabilization_threshold=0.0025,
+                        max_depenetration_velocity=1000.0,
+                    ),
+                    mass_props=sim_utils.MassPropertiesCfg(mass=robot_cube_mass),
+                    scale=(cube_scale, cube_scale, cube_scale),
+                ),
+                init_state=RigidObjectCfg.InitialStateCfg(pos=(0.0, 0.0, 0.0), rot=(1.0, 0.0, 0.0, 0.0)),
+            )
+            self.object_cfgs[robot] = object_cfg
+            self.custom_events[robot] = EventCfg(
+                robot,
+                self.training,
+                self.n_iter_per_stage,
+                self.randomize_scale,
+                self.randomize_mass,
+                self.randomize_effort,
+                self.randomize_vel,
+                cube_scale,
+            )
+
+        print(f"[Config] UHAS layout: {num_envs} envs -> {self.num_robots}")
+
+    def __post_init__(self):
+        self.populate_robot_layout()

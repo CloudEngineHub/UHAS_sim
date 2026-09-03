@@ -7,7 +7,7 @@ from sphere_ctrl_isaaclab.assets.grippers.leap.leap_right.leap_right import LEAP
 from sphere_ctrl_isaaclab.assets.grippers.mano.mano_right.mano_right import MANO_HAND_CFG as MOD_MANO_HAND_RIGHT_CFG
 from sphere_ctrl_isaaclab.assets.grippers.wuji.wuji_right.wuji_right import WUJI_HAND_CFG as WUJI_HAND_RIGHT_CFG
 from sphere_ctrl_isaaclab.assets.grippers.allegro.allegro_right.allegro_right import ALLEGRO_HAND_CFG as ALLEGRO_HAND_RIGHT_CFG
-from sphere_ctrl_isaaclab import IRVL_ASSET_PATH
+from sphere_ctrl_isaaclab.assets import IRVL_ASSET_PATH
 from sphere_ctrl_isaaclab.tasks.single_gripper.agents.rsl_rl_ppo_cfg import SingleGripperPPORunnerCfg
 import os 
 import json
@@ -213,7 +213,7 @@ class SingleHandEnvCfg(DirectRLEnvCfg):
     decimation = 2 # Manages model frequency
     episode_length_s = 30.0
     max_consecutive_success = 10
-    inclination = -20.0 # Degrees - Negative -> Downward (fingers pointing down)
+    inclination = -15.0 # Degrees - Negative -> Downward (fingers pointing down)
     sphere_cik_info = "sphere_cik.json" # Used only for start up configuration
 
     # Dynamic num_steps_per_env (single gripper specific)
@@ -221,7 +221,7 @@ class SingleHandEnvCfg(DirectRLEnvCfg):
     num_steps_per_env = rsl_config.num_steps_per_env
 
     # Robot selection (saved in config file after training for reproducibility)
-    robot: str = "wuji_right"
+    robot: str = "leap_right"
     # Possible values: "shadow_right", "leap_right", "mano_right", "allegro_right", "wuji_right"
 
     # Training Options
@@ -229,10 +229,14 @@ class SingleHandEnvCfg(DirectRLEnvCfg):
     init_pos = [0.65, 0.0, 0.3]        # Initial object position in sphere frame (radii units) - used in reset
     action_noise = 0.05 # % 
     training = True    
-    evaluation = True
+    evaluation = False
 
-    # DexCube scaling parameters (matching multi_env_cfg.py logic)
-    scale = 7.0 / 6.0
+    # Object scaling parameters (matching multi_env_cfg.py logic)
+    object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd" # scale 7.0 / 6.0
+    # object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/003_cracker_box.usd" # scale 3.5 / 6.0
+    # object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/006_mustard_bottle.usd" # scale 5.0 / 6.0
+    # object_usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/005_tomato_soup_can.usd" # scale 7.0 / 6.0
+    scale = 7.0 / 6.0 # 6 cm size for Isaac lab default DexCube 
     base_radius = 0.09119
     cube_mass = 0.104
     cube_size = 0.07
@@ -385,7 +389,7 @@ class SingleHandEnvCfg(DirectRLEnvCfg):
     object_cfg: RigidObjectCfg = RigidObjectCfg(
         prim_path="/World/envs/env_.*/object",
         spawn=sim_utils.UsdFileCfg(
-            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+            usd_path=object_usd_path,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(
                 kinematic_enabled=False,
                 disable_gravity=False,
@@ -406,8 +410,8 @@ class SingleHandEnvCfg(DirectRLEnvCfg):
         prim_path="/Visuals/goal_marker",
         markers={
             "goal": sim_utils.UsdFileCfg(
-                usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
-                scale=(1.0, 1.0, 1.0),
+                usd_path=object_usd_path,
+                scale=(scale/2, scale/2, scale/2),
             )
         },
     )
