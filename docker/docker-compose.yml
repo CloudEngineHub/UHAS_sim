@@ -1,0 +1,86 @@
+name: uhas-sim
+
+x-isaac-volumes: &isaac-volumes
+  # Shader / Kit caches. First Isaac Sim launch is slow; later runs reuse these.
+  - type: volume
+    source: isaac-cache-kit
+    target: ${DOCKER_ISAACSIM_ROOT_PATH}/kit/cache
+  - type: volume
+    source: isaac-cache-ov
+    target: ${DOCKER_USER_HOME}/.cache/ov
+  - type: volume
+    source: isaac-cache-pip
+    target: ${DOCKER_USER_HOME}/.cache/pip
+  - type: volume
+    source: isaac-cache-gl
+    target: ${DOCKER_USER_HOME}/.cache/nvidia/GLCache
+  - type: volume
+    source: isaac-cache-compute
+    target: ${DOCKER_USER_HOME}/.nv/ComputeCache
+  - type: volume
+    source: isaac-logs
+    target: ${DOCKER_USER_HOME}/.nvidia-omniverse/logs
+  - type: volume
+    source: isaac-carb-logs
+    target: ${DOCKER_ISAACSIM_ROOT_PATH}/kit/logs/Kit/Isaac-Sim
+  - type: volume
+    source: isaac-data
+    target: ${DOCKER_USER_HOME}/.local/share/ov/data
+  - type: volume
+    source: isaac-docs
+    target: ${DOCKER_USER_HOME}/Documents
+  # Live source: assets/grippers is a symlink into repo-root grippers/.
+  - type: bind
+    source: ..
+    target: ${UHAS_PATH}
+  # Local X11 for play.py (headless training ignores DISPLAY).
+  - type: bind
+    source: /tmp/.X11-unix
+    target: /tmp/.X11-unix
+
+services:
+  uhas:
+    env_file: .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ISAACSIM_VERSION: ${ISAACSIM_VERSION}
+        ISAACLAB_VERSION: ${ISAACLAB_VERSION}
+    image: uhas-sim:isaac4.5-lab2.2.1
+    container_name: uhas-sim
+    working_dir: ${UHAS_PATH}
+    environment:
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - PRIVACY_CONSENT=${PRIVACY_CONSENT}
+      - OMNI_KIT_ALLOW_ROOT=1
+      - ISAACLAB_PATH=${DOCKER_ISAACLAB_PATH}
+      - ISAACSIM_ROOT_PATH=${DOCKER_ISAACSIM_ROOT_PATH}
+      - UHAS_PATH=${UHAS_PATH}
+      - DISPLAY=${DISPLAY:-}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes: *isaac-volumes
+    network_mode: host
+    shm_size: "16gb"
+    stdin_open: true
+    tty: true
+    init: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  isaac-cache-kit:
+  isaac-cache-ov:
+  isaac-cache-pip:
+  isaac-cache-gl:
+  isaac-cache-compute:
+  isaac-logs:
+  isaac-carb-logs:
+  isaac-data:
+  isaac-docs:

@@ -58,6 +58,7 @@ See the [LICENSE](LICENSE) file for the full license text.
   - [Setup the Simulation](#setup-the-simulation)
     - [Requirements](#requirements)
     - [Installation](#installation)
+    - [Docker](#docker)
     - [Running the Simulation](#running-the-simulation)
       - [UHAS-Inhand-Repose (Our Method)](#uhas-inhand-repose-our-method)
       - [Single-Hand-Repose (Baseline)](#single-hand-repose-baseline)
@@ -76,7 +77,7 @@ See the [LICENSE](LICENSE) file for the full license text.
 - **NVIDIA Isaac Sim 4.5.0**
 - **Isaac Lab 2.2.1** 
 - Python 3.10+
-- Anaconda / Miniconda (strongly recommended)
+- Anaconda / Miniconda (strongly recommended), or Docker (see [Docker](#docker))
 - GPU with sufficient VRAM (≥ 16 GB recommended for 1000+ parallel environments)
 
 ### Installation
@@ -104,6 +105,49 @@ See the [LICENSE](LICENSE) file for the full license text.
    ```bash
    python -m pip install -e ./sphere_ctrl_isaaclab/source/sphere_ctrl_isaaclab
    ```
+
+### Docker
+
+Use this if you want a self-contained Isaac Sim 4.5.0 + Isaac Lab 2.2.1 environment without touching a host conda install. Files live in [`docker/`](docker/).
+
+**Host prerequisites**
+
+- Docker Engine ≥ 26 and Compose v2 ([install](https://docs.docker.com/engine/install/ubuntu/), then [post-install](https://docs.docker.com/engine/install/linux-postinstall/) so you can run without `sudo`)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), then:
+  ```bash
+  sudo nvidia-ctk runtime configure --runtime=docker
+  sudo systemctl restart docker
+  docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu20.04 nvidia-smi
+  ```
+- NVIDIA GPU driver on the **host** (not in the image). Isaac Sim 4.5.0 is tested with Linux **535.129.03**; newer drivers often work but are not fully validated by NVIDIA
+- NGC access for `nvcr.io/nvidia/isaac-sim:4.5.0`: [API key](https://org.ngc.nvidia.com/setup/api-key), then `docker login nvcr.io` (username `$oauthtoken`)
+- ~40–60 GB disk. The first Isaac Sim launch inside the container compiles shaders (several minutes); caches persist in named Docker volumes.
+
+Inside the image, `python` is Isaac Sim’s interpreter and we keep the **PyTorch that ships with Sim 4.5**. Isaac Lab’s default installer would replace it with `torch==2.7.0+cu128`, which requires host driver 570+. We skip that so the container still runs on a 535.x host.
+
+**Build and enter**
+
+```bash
+# GUI (play.py): allow local docker clients to use your X server
+xhost +local:docker
+
+docker compose -f docker/docker-compose.yml up -d --build
+docker compose -f docker/docker-compose.yml exec uhas bash
+```
+
+Inside the container, `python` is Isaac Sim’s interpreter. The repo is bind-mounted at `/workspace/UHAS_sim`.
+
+```bash
+python -c "import isaaclab, sphere_ctrl_isaaclab; print('ok')"
+
+cd /workspace/UHAS_sim/sphere_ctrl_isaaclab/scripts/rsl_rl
+python train.py --task UHAS-Inhand-Repose --headless
+python play.py --task UHAS-Inhand-Repose --checkpoint /workspace/UHAS_sim/models/<ckpt>.pt
+```
+
+The container runs as root, so `logs/`, `outputs/`, and `wandb/` written into the bind-mount will be root-owned on the host. Fix with `sudo chown -R "$USER" sphere_ctrl_isaaclab/logs sphere_ctrl_isaaclab/outputs sphere_ctrl_isaaclab/wandb`.
+
+By using the image you accept the [NVIDIA Omniverse EULA](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement) (`ACCEPT_EULA=Y` in `docker/.env`).
 
 ### Running the Simulation
 
