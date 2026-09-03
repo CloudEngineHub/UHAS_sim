@@ -256,8 +256,8 @@ def make_parser():
 
 ```bash
 cd process_urdf
-python process_urdf.py --robot_path ../grippers/wuji/wuji_right/wuji_right.urdf \
-                       --base_link base_link \
+python process_urdf.py --robot_path ./grippers/wuji/wuji_right/wuji_right.urdf \
+                       --base_link right_palm_link \
                        --thumb_anchor 1.571 \
                        --verbose
 ```
