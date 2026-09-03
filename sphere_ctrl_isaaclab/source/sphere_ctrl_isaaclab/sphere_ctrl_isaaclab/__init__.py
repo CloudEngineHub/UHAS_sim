@@ -7,12 +7,6 @@
 Python module serving as a project/extension template.
 """
 
-import os 
+from .assets import ASSET_DIR, IRVL_ASSET_PATH  # noqa: F401
 
-# Register Gym environments.
-from .tasks import *
-
-# Register UI extensions.
-from .ui_extension_example import *
-
-IRVL_ASSET_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+# Gym registration: `import sphere_ctrl_isaaclab.tasks` (see train.py / play.py).

@@ -567,6 +567,9 @@ class InHandManipulationEnv(DirectRLEnv):
         print()
 
     def _setup_scene(self):
+        # CLI/Hydra set scene.num_envs after the cfg class is first built.
+        self.cfg.populate_robot_layout()
+
         # add ground plane
         spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg(), translation=[0,0,-0.6])
 

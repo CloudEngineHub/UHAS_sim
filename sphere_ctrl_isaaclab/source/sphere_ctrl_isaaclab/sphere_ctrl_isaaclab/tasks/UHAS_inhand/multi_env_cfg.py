@@ -7,7 +7,7 @@ from sphere_ctrl_isaaclab.assets.grippers.leap.leap_right.leap_right import LEAP
 from sphere_ctrl_isaaclab.assets.grippers.mano.mano_right.mano_right import MANO_HAND_CFG as MOD_MANO_HAND_RIGHT_CFG
 from sphere_ctrl_isaaclab.assets.grippers.allegro.allegro_right.allegro_right import ALLEGRO_HAND_CFG as ALLEGRO_HAND_RIGHT_CFG
 from sphere_ctrl_isaaclab.assets.grippers.wuji.wuji_right.wuji_right import WUJI_HAND_CFG as WUJI_HAND_RIGHT_CFG
-from sphere_ctrl_isaaclab import IRVL_ASSET_PATH
+from sphere_ctrl_isaaclab.assets import IRVL_ASSET_PATH
 from sphere_ctrl_isaaclab.tasks.UHAS_inhand.agents.rsl_rl_ppo_cfg import SpherePPORunnerCfg     
 from sphere_ctrl_isaaclab.tasks.utils.dr_funcs import *
 from sphere_ctrl_isaaclab.tasks.utils.sphere_torch_utils import import_reference_sphere
@@ -208,26 +208,6 @@ class EventCfg:
                     "num_buckets": 2,
                 },
             )
-
-# Parse --num_envs from CLI
-import sys
-num_envs = 8192  
-
-for i, arg in enumerate(sys.argv):
-    if arg == "--num_envs" and i + 1 < len(sys.argv):
-        try:
-            num_envs = int(sys.argv[i + 1])
-            print(f"[Config] Overridden num_envs from CLI: {num_envs}")
-        except ValueError:
-            print(f"[Config] Warning: Invalid --num_envs value, using default {num_envs}")
-        break
-    elif arg.startswith("--num_envs="):
-        try:
-            num_envs = int(arg.split("=", 1)[1])
-            print(f"[Config] Overridden num_envs from CLI: {num_envs}")
-        except ValueError:
-            pass
-        break
 
 @configclass
 class SphereEnvCfg(DirectRLEnvCfg):
