@@ -67,7 +67,9 @@ done
     moviepy \
     tomli \
     ipywidgets==8.1.5 \
-    psutil
+    psutil \
+    urdfdom-py \
+    pyvista
 
 # Isolated builds pull latest setuptools, which no longer has pkg_resources.
 "${PYTHON}" -m pip install --no-build-isolation --constraint /tmp/isaac-torch-constraint.txt \
