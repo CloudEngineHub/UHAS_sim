@@ -5,7 +5,7 @@ import os
 import trimesh
 from urdf_parser_py.urdf import URDF
 import urdf_parser_py
-import tf.transformations as tf
+import trimesh.transformations as tf
 import matplotlib.pyplot as plt
 from utils_archive import *
 import pyvista as pv

@@ -2,7 +2,7 @@
 import numpy as np
 import json
 import os 
-import tf.transformations as tf
+import trimesh.transformations as tf
 import time
 from utils_urdf import *
 import colorsys
@@ -11,7 +11,6 @@ import numpy.ma as ma
 import trimesh
 from urdf_parser_py.urdf import URDF
 import urdf_parser_py
-import tf.transformations as tf
 import matplotlib.pyplot as plt
 import collections
 try:
@@ -5088,7 +5087,6 @@ def allign_joint_x_axis(joint, desired_x, joint_info, chain, vertices_dict, mesh
     - tuple: (box_min, box_max) or (None, None) if no vertices.
     """
     import numpy as np
-    import tf.transformations as tf
 
     # Normalize desired x-axis direction
     if np.linalg.norm(desired_x) < 1e-6:

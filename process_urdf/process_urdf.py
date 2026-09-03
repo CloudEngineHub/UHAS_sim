@@ -2,7 +2,7 @@
 import numpy as np
 import json
 import os 
-import tf.transformations as tf
+import trimesh.transformations as tf
 import time
 from utils_urdf import *
 from utils_archive import *
