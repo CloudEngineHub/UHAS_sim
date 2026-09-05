@@ -54,7 +54,7 @@ _build
 **/runs/*
 **/logs/*
 **/recordings/*
-**/models/*
+# **/models/*
 **/*.h5
 
 # Pre-Trained Checkpoints
